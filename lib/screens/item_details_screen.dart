@@ -17,11 +17,11 @@ class ItemDetailsScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1544947950-fa07a98d237f',
-                  width: double.infinity,
-                  height: 220,
+                child: Image.asset(
+                  'assets/images/CalculusBook.png',
                   fit: BoxFit.cover,
+                  width: 120,
+                  height: 180,
                 ),
               ),
               const SizedBox(height: 16),
