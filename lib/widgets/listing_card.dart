@@ -37,20 +37,12 @@ class ListingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
+                child: Image.asset(
                   item.imageUrl,
                   width: 60,
                   height: 60,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/placeholder_item.png',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
+                ),  
               ),
               const SizedBox(width: 12),
               Expanded(

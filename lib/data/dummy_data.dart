@@ -8,25 +8,25 @@ class DummyData {
       title: 'Headphones',
       condition: 'Used',
       location: 'Campus Dorm',
-      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+      imageUrl: 'assets/images/Headphones.png',
     ),
     ListingItem(
       title: 'Reading Book',
       condition: 'New',
       location: 'Library Area',
-      imageUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794',
+      imageUrl: 'assets/images/ReadingBook.png',
     ),
     ListingItem(
       title: 'Calculus Book',
       condition: 'Used',
       location: 'Sabanci University',
-      imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f',
+      imageUrl: 'assets/images/CalculusBook.png',
     ),
     ListingItem(
       title: 'Vintage Lamp',
       condition: 'Good',
       location: 'Faculty Office',
-      imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c',
+      imageUrl: 'assets/images/VintageLamp.png',
     ),
   ];
 
