@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
 import '../widgets/primary_button.dart';
+import '../utils/app_text_styles.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   const ItemDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
+    final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
     return Scaffold(
       appBar: AppBar(title: const Text('Item Details')),
       body: SafeArea(
@@ -19,8 +23,8 @@ class ItemDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
                   'https://images.unsplash.com/photo-1544947950-fa07a98d237f',
-                  width: double.infinity,
-                  height: 220,
+                  width: imageWidth,
+                  height: imageHeight,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -28,7 +32,7 @@ class ItemDetailsScreen extends StatelessWidget {
               const Center(
                 child: Text(
                   'Calculus Book',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.title,
                 ),
               ),
               const SizedBox(height: 16),

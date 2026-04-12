@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
+import '../utils/app_text_styles.dart';
 
 class RequestChatScreen extends StatelessWidget {
   const RequestChatScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bubbleMaxWidth = screenWidth * 0.7;
     final messages = [
       {'text': 'Hey! I saw you are interested in swapping for my Calculus book.', 'isMe': false},
       {'text': 'Yes! I can swap it with a pair of headphones.', 'isMe': true},
@@ -28,7 +31,7 @@ class RequestChatScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Ahmet Y.', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text('Ahmet Y.', style: AppTextStyles.sectionTitle.copyWith(fontSize: 16)),
                       Text('Calculus Book'),
                       Text('Campus Dorm'),
                     ],
@@ -48,7 +51,7 @@ class RequestChatScreen extends StatelessWidget {
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(12),
-                      constraints: const BoxConstraints(maxWidth: 260),
+                      constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.blue.shade100 : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),

@@ -3,6 +3,7 @@ import '../data/dummy_data.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import '../utils/app_text_styles.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -23,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 user.name,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
               ),
               const SizedBox(height: 4),
               Text(user.email),

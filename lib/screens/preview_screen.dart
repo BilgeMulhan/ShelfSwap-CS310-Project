@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../widgets/primary_button.dart';
+import '../utils/app_text_styles.dart';
 
 class PreviewScreen extends StatelessWidget {
   const PreviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final previewImageSize = screenWidth < 360 ? 120.0 : 150.0;
     return Scaffold(
       appBar: AppBar(title: const Text('Preview')),
       body: SafeArea(
@@ -16,8 +19,8 @@ class PreviewScreen extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                height: 150,
-                width: 150,
+                height: previewImageSize,
+                width: previewImageSize,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -26,7 +29,7 @@ class PreviewScreen extends StatelessWidget {
                 child: const Center(child: Text('Image')),
               ),
               const SizedBox(height: 16),
-              const Text('Calculus Book', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+              const Text('Calculus Book', style: AppTextStyles.title),
               const SizedBox(height: 16),
               const Align(alignment: Alignment.centerLeft, child: Text('Description:')),
               const SizedBox(height: 4),
