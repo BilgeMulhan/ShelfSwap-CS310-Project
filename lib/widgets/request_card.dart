@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/request_item.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_text_styles.dart';
 
 class RequestCard extends StatelessWidget {
   final RequestItem request;
@@ -16,20 +18,20 @@ class RequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppPaddings.card,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               request.itemTitle,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 4),
             Text('Sender: ${request.sender}'),
             Text('Location: ${request.location}'),
             Text(
               request.time,
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: AppTextStyles.subtitle,
             ),
             if (showActions) ...[
               const SizedBox(height: 10),

@@ -53,6 +53,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageBoxSize = screenWidth < 360 ? 100.0 : 120.0;
     return Scaffold(
       appBar: AppBar(title: const Text('Add Item')),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
@@ -62,60 +64,65 @@ class _AddItemScreenState extends State<AddItemScreen> {
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  height: 120,
-                  width: 120,
+              Center(
+                child: Container(
+                  height: imageBoxSize,
+                  width: imageBoxSize,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: Colors.grey),
                   ),
-                  child: const Center(child: Text('Tap to upload image')),
+                  child: const Center(
+                    child: Text('Tap to upload'),
+                  ),
                 ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  controller: _itemNameController,
-                  hintText: 'Item Name',
-                  icon: Icons.inventory_2_outlined,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Item name is required' : null,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _categoryController,
-                  hintText: 'Category',
-                  icon: Icons.category_outlined,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Category is required' : null,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _conditionController,
-                  hintText: 'Condition',
-                  icon: Icons.star_outline,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Condition is required' : null,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _locationController,
-                  hintText: 'Location',
-                  icon: Icons.location_on_outlined,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Location is required' : null,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _descriptionController,
-                  hintText: 'Description of the item',
-                  icon: Icons.description_outlined,
-                  maxLines: 3,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Description is required' : null,
-                ),
-                const SizedBox(height: 20),
-                PrimaryButton(text: 'Preview Listing', onPressed: _previewListing),
-              ],
+              ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    controller: _itemNameController,
+                    hintText: 'Item Name',
+                    icon: Icons.inventory_2_outlined,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Item name is required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomTextField(
+                    controller: _categoryController,
+                    hintText: 'Category',
+                    icon: Icons.category_outlined,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Category is required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomTextField(
+                    controller: _conditionController,
+                    hintText: 'Condition',
+                    icon: Icons.star_outline,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Condition is required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomTextField(
+                    controller: _locationController,
+                    hintText: 'Location',
+                    icon: Icons.location_on_outlined,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Location is required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CustomTextField(
+                    controller: _descriptionController,
+                    hintText: 'Description of the item',
+                    icon: Icons.description_outlined,
+                    maxLines: 3,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Description is required' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  PrimaryButton(text: 'Preview Listing', onPressed: _previewListing),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}

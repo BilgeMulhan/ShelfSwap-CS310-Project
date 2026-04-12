@@ -12,6 +12,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listings = DummyData.latestListings;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth < 360 ? 16.0 : 20.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -21,7 +23,7 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
-          padding: AppPaddings.screen,
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
 import '../widgets/primary_button.dart';
+import '../utils/app_text_styles.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   const ItemDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
+    final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Item Details')),
       body: SafeArea(
@@ -20,15 +25,15 @@ class ItemDetailsScreen extends StatelessWidget {
                 child: Image.asset(
                   'assets/images/CalculusBook.png',
                   fit: BoxFit.cover,
-                  width: 120,
-                  height: 180,
+                  width: imageWidth,
+                  height: imageHeight,
                 ),
               ),
               const SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Calculus Book',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.title,
                 ),
               ),
               const SizedBox(height: 16),
@@ -40,7 +45,10 @@ class ItemDetailsScreen extends StatelessWidget {
               const SizedBox(height: 6),
               const Text('Location: Sabanci University'),
               const SizedBox(height: 20),
-              PrimaryButton(text: 'Send Swap Request', onPressed: () {}),
+              PrimaryButton(
+                text: 'Send Swap Request',
+                onPressed: () {},
+              ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {},

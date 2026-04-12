@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/listing_item.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_text_styles.dart';
 
 class ListingCard extends StatelessWidget {
   final ListingItem item;
@@ -22,6 +24,9 @@ class ListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageSize = screenWidth * 0.16;
+
     return Card(
       color: Colors.white,
       elevation: 1.5,
@@ -32,15 +37,15 @@ class ListingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: AppPaddings.card,
           child: Row(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   item.imageUrl,
-                  width: 60,
-                  height: 60,
+                  width: imageSize,
+                  height: imageSize,
                   fit: BoxFit.cover,
                 ),  
               ),
@@ -51,7 +56,7 @@ class ListingCard extends StatelessWidget {
                   children: [
                     Text(
                       item.title,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
                     ),
                     const SizedBox(height: 4),
                     Text('Condition: ${item.condition}'),
