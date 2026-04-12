@@ -11,6 +11,7 @@ class ItemDetailsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
     final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Item Details')),
       body: SafeArea(
@@ -21,11 +22,11 @@ class ItemDetailsScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1544947950-fa07a98d237f',
+                child: Image.asset(
+                  'assets/images/CalculusBook.png',
+                  fit: BoxFit.cover,
                   width: imageWidth,
                   height: imageHeight,
-                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 16),
@@ -44,7 +45,10 @@ class ItemDetailsScreen extends StatelessWidget {
               const SizedBox(height: 6),
               const Text('Location: Sabanci University'),
               const SizedBox(height: 20),
-              PrimaryButton(text: 'Send Swap Request', onPressed: () {}),
+              PrimaryButton(
+                text: 'Send Swap Request',
+                onPressed: () {},
+              ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {},
