@@ -42,12 +42,35 @@ class ListingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  item.imageUrl,
-                  width: imageSize,
-                  height: imageSize,
-                  fit: BoxFit.cover,
-                ),  
+                child: item.imageUrl.startsWith('http')
+                    ? Image.network(
+                        item.imageUrl,
+                        width: imageSize,
+                        height: imageSize,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: imageSize,
+                            height: imageSize,
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.image_not_supported),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        item.imageUrl,
+                        width: imageSize,
+                        height: imageSize,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: imageSize,
+                            height: imageSize,
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.image_not_supported),
+                          );
+                        },
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

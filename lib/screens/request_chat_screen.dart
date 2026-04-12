@@ -22,18 +22,18 @@ class RequestChatScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const Padding(
+            Padding(
               padding: AppPaddings.screen,
               child: Row(
                 children: [
-                  CircleAvatar(radius: 24),
-                  SizedBox(width: 12),
+                  const CircleAvatar(radius: 24),
+                  const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Ahmet Y.', style: AppTextStyles.sectionTitle.copyWith(fontSize: 16)),
-                      Text('Calculus Book'),
-                      Text('Campus Dorm'),
+                      const Text('Calculus Book'),
+                      const Text('Campus Dorm'),
                     ],
                   ),
                 ],
