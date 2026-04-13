@@ -51,6 +51,19 @@ class ProfileScreen extends StatelessWidget {
                 title: const Text('Favorites'),
                 onTap: () => Navigator.pushNamed(context, AppRoutes.favorites),
               ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: () {
+                  // Clear navigation stack and go to sign in
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.signIn,
+                    (route) => false,
+                  );
+                },
+              ),
             ],
           ),
         ),

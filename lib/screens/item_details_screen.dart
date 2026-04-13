@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
 import '../widgets/primary_button.dart';
 import '../utils/app_text_styles.dart';
+import '../models/listing_item.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
-  const ItemDetailsScreen({super.key});
+  final ListingItem? item;
+
+  const ItemDetailsScreen({super.key, this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +15,13 @@ class ItemDetailsScreen extends StatelessWidget {
     final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
     final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
 
+    final displayImage = item?.imageUrl ?? 'assets/images/placeholder_item.png';
+    final displayTitle = item?.title ?? 'Item Details';
+    final displayCondition = item?.condition ?? 'Unknown';
+    final displayLocation = item?.location ?? 'Unknown';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Item Details')),
+      appBar: AppBar(title: Text(displayTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppPaddings.screen,
@@ -22,28 +30,43 @@ class ItemDetailsScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/images/CalculusBook.png',
-                  fit: BoxFit.cover,
-                  width: imageWidth,
-                  height: imageHeight,
-                ),
+                child: displayImage.startsWith('http')
+                    ? Image.network(
+                        displayImage,
+                        fit: BoxFit.cover,
+                        width: imageWidth,
+                        height: imageHeight,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: imageWidth,
+                            height: imageHeight,
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.image_not_supported),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        displayImage,
+                        fit: BoxFit.cover,
+                        width: imageWidth,
+                        height: imageHeight,
+                      ),
               ),
               const SizedBox(height: 16),
-              const Center(
+              Center(
                 child: Text(
-                  'Calculus Book',
+                  displayTitle,
                   style: AppTextStyles.title,
                 ),
               ),
               const SizedBox(height: 16),
+              Text('Condition: $displayCondition'),
+              const SizedBox(height: 8),
+              Text('Location: $displayLocation'),
+              const SizedBox(height: 12),
               const Text('Description:'),
               const SizedBox(height: 4),
-              const Text('Introduction to Calculus - good condition.'),
-              const SizedBox(height: 12),
-              const Text('Owner: Ahmet Y.'),
-              const SizedBox(height: 6),
-              const Text('Location: Sabanci University'),
+              Text(item != null ? 'Details about ${item!.title}.' : 'No details available.'),
               const SizedBox(height: 20),
               PrimaryButton(
                 text: 'Send Swap Request',
