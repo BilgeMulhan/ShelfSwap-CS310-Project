@@ -8,6 +8,7 @@ import 'screens/sign_in_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/edit_profile_screen.dart';
 import 'screens/item_details_screen.dart';
+import 'models/listing_item.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/my_listings_screen.dart';
 import 'screens/add_item_screen.dart';
@@ -40,7 +41,10 @@ class ShelfSwapApp extends StatelessWidget {
         AppRoutes.signIn: (context) => const SignInScreen(),
         AppRoutes.profile: (context) => const ProfileScreen(),
         AppRoutes.editProfile: (context) => const EditProfileScreen(),
-        AppRoutes.itemDetails: (context) => const ItemDetailsScreen(),
+        AppRoutes.itemDetails: (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          return ItemDetailsScreen(item: args is ListingItem ? args : null);
+        },
         AppRoutes.favorites: (context) => const FavoritesScreen(),
         AppRoutes.myListings: (context) => const MyListingsScreen(),
         AppRoutes.addItem: (context) => const AddItemScreen(),

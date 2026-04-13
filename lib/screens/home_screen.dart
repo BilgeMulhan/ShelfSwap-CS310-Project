@@ -57,7 +57,11 @@ class HomeScreen extends StatelessWidget {
                     final item = listings[index];
                     return ListingCard(
                       item: item,
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.itemDetails),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        AppRoutes.itemDetails,
+                        arguments: item,
+                      ),
                     );
                   },
                 ),
