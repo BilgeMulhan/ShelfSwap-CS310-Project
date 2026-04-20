@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "148835504848",
+    "project_id": "shelfswap-36603",
+    "storage_bucket": "shelfswap-36603.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148835504848:android:ac2b9532678a8c20eb84d5",
+        "android_client_info": {
+          "package_name": "com.example.shelfswap_flutter_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5Tmlr9GKMCrNC3zI811Fe2aTL0RBHUB4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

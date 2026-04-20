@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'firebase_options.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
 import 'screens/home_screen.dart';
@@ -16,7 +18,11 @@ import 'screens/preview_screen.dart';
 import 'screens/requests_screen.dart';
 import 'screens/request_chat_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const ShelfSwapApp());
 }
 
