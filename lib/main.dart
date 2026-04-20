@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'providers/auth_provider.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
 import 'screens/home_screen.dart';
@@ -31,33 +33,38 @@ class ShelfSwapApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'ShelfSwap',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        useMaterial3: true,
-      ),
-      initialRoute: AppRoutes.signIn,
-      routes: {
-        AppRoutes.home: (context) => const HomeScreen(),
-        AppRoutes.createAccount: (context) => const CreateAccountScreen(),
-        AppRoutes.signIn: (context) => const SignInScreen(),
-        AppRoutes.profile: (context) => const ProfileScreen(),
-        AppRoutes.editProfile: (context) => const EditProfileScreen(),
-        AppRoutes.itemDetails: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          return ItemDetailsScreen(item: args is ListingItem ? args : null);
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'ShelfSwap',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+          scaffoldBackgroundColor: AppColors.background,
+          textTheme: GoogleFonts.poppinsTextTheme(),
+          useMaterial3: true,
+        ),
+        initialRoute: AppRoutes.signIn,
+        routes: {
+          AppRoutes.home: (context) => const HomeScreen(),
+          AppRoutes.createAccount: (context) => const CreateAccountScreen(),
+          AppRoutes.signIn: (context) => const SignInScreen(),
+          AppRoutes.profile: (context) => const ProfileScreen(),
+          AppRoutes.editProfile: (context) => const EditProfileScreen(),
+          AppRoutes.itemDetails: (context) {
+            final args = ModalRoute.of(context)!.settings.arguments;
+            return ItemDetailsScreen(item: args is ListingItem ? args : null);
+          },
+          AppRoutes.favorites: (context) => const FavoritesScreen(),
+          AppRoutes.myListings: (context) => const MyListingsScreen(),
+          AppRoutes.addItem: (context) => const AddItemScreen(),
+          AppRoutes.preview: (context) => const PreviewScreen(),
+          AppRoutes.requests: (context) => const RequestsScreen(),
+          AppRoutes.requestChat: (context) => const RequestChatScreen(),
         },
-        AppRoutes.favorites: (context) => const FavoritesScreen(),
-        AppRoutes.myListings: (context) => const MyListingsScreen(),
-        AppRoutes.addItem: (context) => const AddItemScreen(),
-        AppRoutes.preview: (context) => const PreviewScreen(),
-        AppRoutes.requests: (context) => const RequestsScreen(),
-        AppRoutes.requestChat: (context) => const RequestChatScreen(),
-      },
+      ),
     );
   }
 }

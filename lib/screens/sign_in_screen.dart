@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../utils/app_text_styles.dart';
@@ -36,22 +38,24 @@ class _SignInScreenState extends State<SignInScreen> {
     return null;
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Sign in successful.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
-              },
-              child: const Text('OK'),
-            )
-          ],
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signIn(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Giriş başarısız.'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -59,6 +63,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = context.watch<AuthProvider>().isLoading;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -89,7 +95,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   validator: _validatePassword,
                 ),
                 const SizedBox(height: 20),
-                PrimaryButton(text: 'Continue', onPressed: _submit),
+                isLoading
+                    ? const CircularProgressIndicator()
+                    : PrimaryButton(text: 'Continue', onPressed: _submit),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, AppRoutes.createAccount),
