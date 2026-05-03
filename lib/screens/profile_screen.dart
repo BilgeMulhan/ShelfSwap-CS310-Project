@@ -13,7 +13,6 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
           final firebaseUser = authProvider.user;
