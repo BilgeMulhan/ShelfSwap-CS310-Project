@@ -79,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 itemBuilder: (context, index) {
                                   final item = listings[index];
                                   return ListingCard(
+                                    key: ValueKey(item.id),
                                     item: item,
                                     onTap: () => Navigator.pushNamed(
                                       context,
