@@ -123,9 +123,14 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                       itemBuilder: (context, index) {
                         final item = userListings[index];
                         return ListingCard(
+                          key: ValueKey(item.id),
                           item: item,
                           trailingLabel: 'Edit',
-                          onTrailingPressed: () => Navigator.pushNamed(context, AppRoutes.addItem),
+                          onTrailingPressed: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.addItem,
+                            arguments: item,
+                          ),
                           showRemove: true,
                           onRemove: () => _deleteListing(item.id),
                         );

@@ -29,13 +29,13 @@ class ListingItem {
   factory ListingItem.fromFirestore(Map<String, dynamic> data, String id) {
     return ListingItem(
       id: id,
-      title: data['title'] ?? '',
-      condition: data['condition'] ?? '',
-      location: data['location'] ?? '',
-      imageUrl: data['imageUrl'] ?? '',
-      description: data['description'] ?? '',
-      category: data['category'] ?? '',
-      userId: data['userId'] ?? '',
+      title: data['title']?.toString().trim() ?? '',
+      condition: data['condition']?.toString().trim() ?? '',
+      location: data['location']?.toString().trim() ?? '',
+      imageUrl: data['imageUrl']?.toString().trim() ?? '',
+      description: data['description']?.toString().trim() ?? '',
+      category: data['category']?.toString().trim() ?? '',
+      userId: data['userId']?.toString().trim() ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -55,4 +55,23 @@ class ListingItem {
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
+
+  // Copy with updates
+  ListingItem copyWith({Map<String, dynamic>? updates}) {
+    if (updates == null) return this;
+
+    return ListingItem(
+      id: id,
+      title: updates['title'] ?? title,
+      condition: updates['condition'] ?? condition,
+      location: updates['location'] ?? location,
+      imageUrl: updates['imageUrl'] ?? imageUrl,
+      description: updates['description'] ?? description,
+      category: updates['category'] ?? category,
+      userId: userId,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(), // Always update the updatedAt timestamp
+    );
+  }
 }
+
