@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final bool obscureText;
   final int maxLines;
+  final bool readOnly;
 
   const CustomTextField({
     super.key,
@@ -18,12 +19,14 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.obscureText = false,
     this.maxLines = 1,
+    this.readOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      readOnly: readOnly,
       validator: validator,
       obscureText: obscureText,
       maxLines: maxLines,

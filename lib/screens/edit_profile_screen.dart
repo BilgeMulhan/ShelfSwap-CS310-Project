@@ -79,11 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   controller: _emailController,
                   hintText: 'Email',
                   icon: Icons.email_outlined,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Email is required';
-                    if (!value.contains('@')) return 'Enter a valid email';
-                    return null;
-                  },
+                  readOnly: true,
                 ),
                 const SizedBox(height: 12),
                 CustomTextField(

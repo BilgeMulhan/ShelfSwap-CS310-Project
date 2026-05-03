@@ -42,7 +42,6 @@ class _RequestsScreenState extends State<RequestsScreen> with SingleTickerProvid
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,

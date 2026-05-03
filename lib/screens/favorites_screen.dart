@@ -25,7 +25,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Favorites')),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,

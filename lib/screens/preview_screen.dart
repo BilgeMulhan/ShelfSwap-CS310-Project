@@ -66,11 +66,7 @@ class PreviewScreen extends StatelessWidget {
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    AppRoutes.myListings,
-                                    (route) => false,
-                                  );
+                                  Navigator.pop(context);
                                 },
                                 child: const Text('OK'),
                               )
