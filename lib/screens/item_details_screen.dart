@@ -8,14 +8,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final ListingItem? item;
-  final bool showRequestButton;
 
-  const ItemDetailsScreen({super.key, this.item,this.showRequestButton = true,});
+  const ItemDetailsScreen({super.key, this.item});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final currentUser = FirebaseAuth.instance.currentUser;
     final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
     final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
 
@@ -36,25 +34,25 @@ class ItemDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: displayImage.startsWith('http')
                     ? Image.network(
-                        displayImage,
-                        fit: BoxFit.cover,
-                        width: imageWidth,
-                        height: imageHeight,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: imageWidth,
-                            height: imageHeight,
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.image_not_supported),
-                          );
-                        },
-                      )
+                  displayImage,
+                  fit: BoxFit.cover,
+                  width: imageWidth,
+                  height: imageHeight,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: imageWidth,
+                      height: imageHeight,
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.image_not_supported),
+                    );
+                  },
+                )
                     : Image.asset(
-                        displayImage,
-                        fit: BoxFit.cover,
-                        width: imageWidth,
-                        height: imageHeight,
-                      ),
+                  displayImage,
+                  fit: BoxFit.cover,
+                  width: imageWidth,
+                  height: imageHeight,
+                ),
               ),
               const SizedBox(height: 16),
               Center(
@@ -72,33 +70,28 @@ class ItemDetailsScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(item != null ? 'Details about ${item!.title}.' : 'No details available.'),
               const SizedBox(height: 20),
-              if (currentUser != null && item != null && currentUser.uid != item!.userId)
-                PrimaryButton(
-                  text: 'Send Swap Request',
-                  onPressed: () async {
-                    final user = FirebaseAuth.instance.currentUser;
+              PrimaryButton(
+                text: 'Send Swap Request',
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
 
-                    if (user == null || item == null) return;
+                  if (user == null || item == null) return;
 
-                    await FirebaseFirestore.instance.collection('requests').add({
-                      'itemId': item!.id,
-                      'itemTitle': item!.title,
-                      'itemImage': item!.imageUrl,
-                      'itemLocation': item!.location,
+                  await FirebaseFirestore.instance.collection('requests').add({
+                    'itemId': item!.id,
+                    'fromUserId': user.uid,
+                    'toUserId': item!.userId,
+                    'status': 'pending',
+                    'createdAt': Timestamp.now(),
+                  });
 
-                      'fromUserId': user.uid,
-                      'toUserId': item!.userId,
-                      'status': 'pending',
-                      'createdAt': Timestamp.now(),
-                    });
+                  if (!context.mounted) return;
 
-                    if (!context.mounted) return;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Request sent")),
-                    );
-                  },
-                ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Request sent")),
+                  );
+                },
+              ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {},
