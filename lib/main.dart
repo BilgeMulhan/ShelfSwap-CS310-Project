@@ -62,7 +62,10 @@ class ShelfSwapApp extends StatelessWidget {
           },
           AppRoutes.favorites: (context) => const FavoritesScreen(),
           AppRoutes.myListings: (context) => const MyListingsScreen(),
-          AppRoutes.addItem: (context) => const AddItemScreen(),
+          AppRoutes.addItem: (context) {
+            final args = ModalRoute.of(context)!.settings.arguments;
+            return AddItemScreen.fromRouteArguments(args);
+          },
           AppRoutes.preview: (context) => const PreviewScreen(),
           AppRoutes.requests: (context) => const RequestsScreen(),
           AppRoutes.requestChat: (context) => const RequestChatScreen(),

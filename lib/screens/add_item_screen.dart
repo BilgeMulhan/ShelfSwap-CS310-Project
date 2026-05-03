@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../models/listing_item.dart';
 import '../providers/listings_provider.dart';
 import '../providers/auth_provider.dart';
@@ -9,7 +8,17 @@ import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 
 class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+  final ListingItem? itemToEdit;
+
+  const AddItemScreen({super.key, this.itemToEdit});
+
+  // Factory constructor to handle route arguments
+  factory AddItemScreen.fromRouteArguments(Object? arguments) {
+    if (arguments is ListingItem) {
+      return AddItemScreen(itemToEdit: arguments);
+    }
+    return const AddItemScreen();
+  }
 
   @override
   State<AddItemScreen> createState() => _AddItemScreenState();
@@ -23,6 +32,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  bool get _isEditing => widget.itemToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditing) {
+      _itemNameController.text = widget.itemToEdit!.title;
+      _categoryController.text = widget.itemToEdit!.category;
+      _conditionController.text = widget.itemToEdit!.condition;
+      _locationController.text = widget.itemToEdit!.location;
+      _descriptionController.text = widget.itemToEdit!.description;
+    }
+  }
+
   @override
   void dispose() {
     _itemNameController.dispose();
@@ -33,7 +56,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
-  Future<void> _addListing() async {
+  Future<void> _saveListing() async {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
@@ -42,43 +65,70 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final user = authProvider.user;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to add items')),
+        const SnackBar(content: Text('You must be logged in to save items')),
       );
       return;
     }
 
-    final listing = ListingItem(
-      id: '', // Will be set by Firestore
-      title: _itemNameController.text.trim(),
-      condition: _conditionController.text.trim(),
-      location: _locationController.text.trim(),
-      imageUrl: 'assets/images/placeholder_item.png', // Default image for now
-      description: _descriptionController.text.trim(),
-      category: _categoryController.text.trim(),
-      userId: user.uid,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+    if (_isEditing) {
+      // Update existing listing
+      final updates = {
+        'title': _itemNameController.text.trim(),
+        'condition': _conditionController.text.trim(),
+        'location': _locationController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'category': _categoryController.text.trim(),
+      };
 
-    final success = await listingsProvider.addListing(listing);
+      final success = await listingsProvider.updateListing(widget.itemToEdit!.id, updates);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Item added successfully!')),
-      );
-      // Clear form
-      _formKey.currentState!.reset();
-      _itemNameController.clear();
-      _categoryController.clear();
-      _conditionController.clear();
-      _locationController.clear();
-      _descriptionController.clear();
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item updated successfully!')),
+        );
+        Navigator.pop(context); // Go back to previous screen
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(listingsProvider.errorMessage ?? 'Failed to update item')),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(listingsProvider.errorMessage ?? 'Failed to add item')),
+      // Add new listing
+      final listing = ListingItem(
+        id: '', // Will be set by Firestore
+        title: _itemNameController.text.trim(),
+        condition: _conditionController.text.trim(),
+        location: _locationController.text.trim(),
+        imageUrl: 'assets/images/placeholder_item.png', // Default image for now
+        description: _descriptionController.text.trim(),
+        category: _categoryController.text.trim(),
+        userId: user.uid,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
+
+      final success = await listingsProvider.addListing(listing);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item added successfully!')),
+        );
+        // Clear form
+        _formKey.currentState!.reset();
+        _itemNameController.clear();
+        _categoryController.clear();
+        _conditionController.clear();
+        _locationController.clear();
+        _descriptionController.clear();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(listingsProvider.errorMessage ?? 'Failed to add item')),
+        );
+      }
     }
   }
 
@@ -87,7 +137,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageBoxSize = screenWidth < 360 ? 100.0 : 120.0;
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Item')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Item' : 'Add Item')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppPaddings.screen,
@@ -147,7 +197,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     validator: (value) => value == null || value.trim().isEmpty ? 'Description is required' : null,
                   ),
                   const SizedBox(height: 20),
-                  PrimaryButton(text: 'Add Listing', onPressed: _addListing),
+                  PrimaryButton(text: _isEditing ? 'Update Listing' : 'Add Listing', onPressed: _saveListing),
                 ],
               ),
             ),

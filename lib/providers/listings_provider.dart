@@ -78,11 +78,31 @@ class ListingsProvider extends ChangeNotifier {
   Future<bool> updateListing(String listingId, Map<String, dynamic> updates) async {
     try {
       await _listingsService.updateListing(listingId, updates);
+      // Immediately update local lists for instant UI update
+      _updateLocalListing(listingId, updates);
+      notifyListeners();
       return true;
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  // Helper method to update listing in local lists
+  void _updateLocalListing(String listingId, Map<String, dynamic> updates) {
+    // Update in general listings
+    final generalIndex = _listings.indexWhere((item) => item.id == listingId);
+    if (generalIndex != -1) {
+      final updatedItem = _listings[generalIndex].copyWith(updates: updates);
+      _listings[generalIndex] = updatedItem;
+    }
+
+    // Update in user listings
+    final userIndex = _userListings.indexWhere((item) => item.id == listingId);
+    if (userIndex != -1) {
+      final updatedItem = _userListings[userIndex].copyWith(updates: updates);
+      _userListings[userIndex] = updatedItem;
     }
   }
 
