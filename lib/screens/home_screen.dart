@@ -19,8 +19,8 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('ShelfSwap'),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),

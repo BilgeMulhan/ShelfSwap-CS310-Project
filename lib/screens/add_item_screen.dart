@@ -57,7 +57,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final imageBoxSize = screenWidth < 360 ? 100.0 : 120.0;
     return Scaffold(
       appBar: AppBar(title: const Text('Add Item')),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppPaddings.screen,

@@ -4,17 +4,17 @@ import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../utils/app_text_styles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = DummyData.user;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,
@@ -23,11 +23,11 @@ class ProfileScreen extends StatelessWidget {
               const CircleAvatar(radius: 42, backgroundColor: Colors.grey),
               const SizedBox(height: 12),
               Text(
-                user.name,
+                user?.displayName ?? 'User',
                 style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
               ),
               const SizedBox(height: 4),
-              Text(user.email),
+              Text(user?.email ?? 'No email'),
               const SizedBox(height: 24),
               ListTile(
                 leading: const Icon(Icons.edit),
@@ -55,12 +55,13 @@ class ProfileScreen extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('Logout'),
-                onTap: () {
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
                   // Clear navigation stack and go to sign in
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.signIn,
-                    (route) => false,
+                        (route) => false,
                   );
                 },
               ),

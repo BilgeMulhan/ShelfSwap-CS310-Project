@@ -26,7 +26,6 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My Listings')),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,

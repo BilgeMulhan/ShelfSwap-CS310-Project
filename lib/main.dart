@@ -19,6 +19,7 @@ import 'screens/add_item_screen.dart';
 import 'screens/preview_screen.dart';
 import 'screens/requests_screen.dart';
 import 'screens/request_chat_screen.dart';
+import 'screens/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +49,7 @@ class ShelfSwapApp extends StatelessWidget {
         ),
         initialRoute: AppRoutes.signIn,
         routes: {
-          AppRoutes.home: (context) => const HomeScreen(),
+          AppRoutes.home: (context) => const MainScreen(),
           AppRoutes.createAccount: (context) => const CreateAccountScreen(),
           AppRoutes.signIn: (context) => const SignInScreen(),
           AppRoutes.profile: (context) => const ProfileScreen(),
