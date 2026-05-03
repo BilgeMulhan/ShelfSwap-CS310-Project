@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../data/dummy_data.dart';
 import '../utils/app_paddings.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -16,14 +17,40 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _bioController;
+  Future<void> _loadBio() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        _bioController.text = data?['bio'] ?? '';
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    final user = DummyData.user;
-    _nameController = TextEditingController(text: user.name);
-    _emailController = TextEditingController(text: user.email);
-    _bioController = TextEditingController(text: user.bio);
+    final user = FirebaseAuth.instance.currentUser;
+
+    _nameController = TextEditingController(
+      text: user?.displayName ?? user?.email?.split('@').first ?? '',
+    );
+
+    _emailController = TextEditingController(
+      text: user?.email ?? '',
+    );
+
+    _bioController = TextEditingController(
+      text: '',
+    );
+
+    _loadBio();
   }
 
   @override
@@ -34,24 +61,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _save() {
+  void _save() async {
     if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Saved'),
-          content: const Text('Profile information updated successfully.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // update name
+        await user.updateDisplayName(_nameController.text.trim());
+        await user.reload();
+
+        // save bio to Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'bio': _bioController.text.trim(),
+        }, SetOptions(merge: true));
+      }
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
     }
   }
 
