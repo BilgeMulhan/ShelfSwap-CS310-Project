@@ -4,11 +4,13 @@ import '../widgets/primary_button.dart';
 import '../utils/app_text_styles.dart';
 import '../models/listing_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final ListingItem? item;
+  final bool showRequestButton;
 
-  const ItemDetailsScreen({super.key, this.item});
+  const ItemDetailsScreen({super.key, this.item,this.showRequestButton = true,});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +75,29 @@ class ItemDetailsScreen extends StatelessWidget {
               if (currentUser != null && item != null && currentUser.uid != item!.userId)
                 PrimaryButton(
                   text: 'Send Swap Request',
-                  onPressed: () {},
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user == null || item == null) return;
+
+                    await FirebaseFirestore.instance.collection('requests').add({
+                      'itemId': item!.id,
+                      'itemTitle': item!.title,
+                      'itemImage': item!.imageUrl,
+                      'itemLocation': item!.location,
+
+                      'fromUserId': user.uid,
+                      'toUserId': item!.userId,
+                      'status': 'pending',
+                      'createdAt': Timestamp.now(),
+                    });
+
+                    if (!context.mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Request sent")),
+                    );
+                  },
                 ),
               const SizedBox(height: 12),
               OutlinedButton(
