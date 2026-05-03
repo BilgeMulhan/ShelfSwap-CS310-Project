@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/listing_item.dart';
-
+import 'package:image_picker/image_picker.dart';
 class ListingsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -17,6 +19,14 @@ class ListingsService {
             return ListingItem.fromFirestore(doc.data(), doc.id);
           }).toList();
         });
+  }
+
+    // Convert an image to a base64 data URI and store it in Firestore via the listing document.
+  Future<String> uploadListingImage(XFile imageFile, String userId) async {
+    final bytes = await imageFile.readAsBytes();
+    final mimeType = 'image/jpeg';
+    final base64Data = base64Encode(bytes);
+    return 'data:$mimeType;base64,$base64Data';
   }
 
   // Get user's own listings
