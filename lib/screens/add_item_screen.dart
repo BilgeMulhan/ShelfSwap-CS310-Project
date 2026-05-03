@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import '../models/listing_item.dart';
+import '../providers/listings_provider.dart';
+import '../providers/auth_provider.dart';
 import '../utils/app_paddings.dart';
-import '../utils/app_routes.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 
@@ -30,23 +33,51 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
-  void _previewListing() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Item information is valid. Redirecting to preview.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, AppRoutes.preview);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+  Future<void> _addListing() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    final listingsProvider = context.read<ListingsProvider>();
+
+    final user = authProvider.user;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to add items')),
+      );
+      return;
+    }
+
+    final listing = ListingItem(
+      id: '', // Will be set by Firestore
+      title: _itemNameController.text.trim(),
+      condition: _conditionController.text.trim(),
+      location: _locationController.text.trim(),
+      imageUrl: 'assets/images/placeholder_item.png', // Default image for now
+      description: _descriptionController.text.trim(),
+      category: _categoryController.text.trim(),
+      userId: user.uid,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final success = await listingsProvider.addListing(listing);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item added successfully!')),
+      );
+      // Clear form
+      _formKey.currentState!.reset();
+      _itemNameController.clear();
+      _categoryController.clear();
+      _conditionController.clear();
+      _locationController.clear();
+      _descriptionController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(listingsProvider.errorMessage ?? 'Failed to add item')),
       );
     }
   }
@@ -116,7 +147,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     validator: (value) => value == null || value.trim().isEmpty ? 'Description is required' : null,
                   ),
                   const SizedBox(height: 20),
-                  PrimaryButton(text: 'Preview Listing', onPressed: _previewListing),
+                  PrimaryButton(text: 'Add Listing', onPressed: _addListing),
                 ],
               ),
             ),
