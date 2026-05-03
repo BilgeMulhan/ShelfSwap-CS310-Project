@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/listing_item.dart';
 import '../services/listings_service.dart';
 
@@ -120,6 +121,11 @@ class ListingsProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // Upload an item image and return a Firestore-friendly base64 data URI.
+  Future<String> uploadListingImage(XFile imageFile, String userId) async {
+    return await _listingsService.uploadListingImage(imageFile, userId);
   }
 
   // Get single listing

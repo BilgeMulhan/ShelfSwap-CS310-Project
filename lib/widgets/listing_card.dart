@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../models/listing_item.dart';
 import '../utils/app_colors.dart';
@@ -57,20 +59,27 @@ class ListingCard extends StatelessWidget {
                           );
                         },
                       )
-                    : Image.asset(
-                        item.imageUrl,
-                        width: imageSize,
-                        height: imageSize,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
+                    : item.imageUrl.startsWith('data:image')
+                        ? Image.memory(
+                            base64Decode(item.imageUrl.split(',').last),
                             width: imageSize,
                             height: imageSize,
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.image_not_supported),
-                          );
-                        },
-                      ),
+                            fit: BoxFit.cover,
+                          )
+                        : Image.asset(
+                            item.imageUrl,
+                            width: imageSize,
+                            height: imageSize,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: imageSize,
+                                height: imageSize,
+                                color: Colors.grey.shade200,
+                                child: const Icon(Icons.image_not_supported),
+                              );
+                            },
+                          ),
               ),
               const SizedBox(width: 12),
               Expanded(
