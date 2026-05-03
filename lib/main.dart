@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/listings_provider.dart';
+import 'providers/requests_provider.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
 import 'screens/home_screen.dart';
@@ -39,6 +40,7 @@ class ShelfSwapApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ListingsProvider()),
+        ChangeNotifierProvider(create: (_) => RequestsProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
