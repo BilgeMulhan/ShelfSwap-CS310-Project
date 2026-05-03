@@ -3,6 +3,7 @@ import '../utils/app_paddings.dart';
 import '../widgets/primary_button.dart';
 import '../utils/app_text_styles.dart';
 import '../models/listing_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final ListingItem? item;
@@ -12,6 +13,7 @@ class ItemDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final currentUser = FirebaseAuth.instance.currentUser;
     final imageWidth = screenWidth < 360 ? 100.0 : 120.0;
     final imageHeight = screenWidth < 360 ? 150.0 : 180.0;
 
@@ -68,10 +70,11 @@ class ItemDetailsScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(item != null ? 'Details about ${item!.title}.' : 'No details available.'),
               const SizedBox(height: 20),
-              PrimaryButton(
-                text: 'Send Swap Request',
-                onPressed: () {},
-              ),
+              if (currentUser != null && item != null && currentUser.uid != item!.userId)
+                PrimaryButton(
+                  text: 'Send Swap Request',
+                  onPressed: () {},
+                ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {},
