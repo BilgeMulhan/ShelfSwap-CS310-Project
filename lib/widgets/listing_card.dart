@@ -13,6 +13,9 @@ class ListingCard extends StatelessWidget {
   final bool showRemove;
   final String? trailingLabel;
   final VoidCallback? onTrailingPressed;
+  final bool showFavorite;
+  final bool isFavorite;
+  final VoidCallback? onFavoritePressed;
 
   const ListingCard({
     super.key,
@@ -22,6 +25,9 @@ class ListingCard extends StatelessWidget {
     this.showRemove = false,
     this.trailingLabel,
     this.onTrailingPressed,
+    this.showFavorite = false,
+    this.isFavorite = false,
+    this.onFavoritePressed,
   });
 
   @override
@@ -111,6 +117,14 @@ class ListingCard extends StatelessWidget {
                         color: AppColors.danger,
                       ),
                     ),
+                  if (showFavorite)
+                    IconButton(
+                      onPressed: onFavoritePressed,
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? AppColors.danger : Colors.grey,
+                      ),
+                    ),  
                 ],
               ),
             ],

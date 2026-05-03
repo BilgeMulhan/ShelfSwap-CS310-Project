@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import '../data/dummy_data.dart';
+import 'package:provider/provider.dart';
+
 import '../models/listing_item.dart';
+import '../providers/auth_provider.dart';
+import '../providers/listings_provider.dart';
 import '../utils/app_paddings.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/listing_card.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -13,49 +15,122 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  late List<ListingItem> favoriteItems;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    favoriteItems = List.from(DummyData.latestListings.take(3));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().user;
+
+      if (user != null) {
+        final listingsProvider = context.read<ListingsProvider>();
+
+        listingsProvider.loadListings();
+        listingsProvider.loadFavorites(user.uid);
+      }
+    });
+  }
+
+  List<ListingItem> _filterFavorites(List<ListingItem> favorites) {
+    final query = _searchQuery.toLowerCase().trim();
+
+    if (query.isEmpty) return favorites;
+
+    return favorites.where((item) {
+      return item.title.toLowerCase().contains(query) ||
+          item.description.toLowerCase().contains(query) ||
+          item.category.toLowerCase().contains(query) ||
+          item.condition.toLowerCase().contains(query) ||
+          item.location.toLowerCase().contains(query);
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
+      appBar: AppBar(
+        title: const Text('Favorites'),
+      ),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,
-          child: Column(
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search items...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: favoriteItems.length,
-                  itemBuilder: (context, index) {
-                    final item = favoriteItems[index];
-                    return ListingCard(
-                      item: item,
-                      showRemove: true,
-                      onRemove: () {
-                        setState(() {
-                          favoriteItems.removeAt(index);
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+          child: Consumer<ListingsProvider>(
+            builder: (context, listingsProvider, child) {
+              if (user == null) {
+                return const Center(
+                  child: Text('Please log in to see your favorites.'),
+                );
+              }
+
+              if (listingsProvider.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              final favoriteItems =
+                  _filterFavorites(listingsProvider.favoriteListings);
+
+              return Column(
+                children: [
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search items...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: favoriteItems.isEmpty
+                        ? Center(
+                            child: Text(
+                              _searchQuery.trim().isEmpty
+                                  ? 'No favorite items yet'
+                                  : 'No matching favorite items found',
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: favoriteItems.length,
+                            itemBuilder: (context, index) {
+                              final item = favoriteItems[index];
+
+                              return ListingCard(
+                                key: ValueKey(item.id),
+                                item: item,
+                                showFavorite: true,
+                                isFavorite: true,
+                                onFavoritePressed: () {
+                                  listingsProvider.toggleFavorite(
+                                    user.uid,
+                                    item.id,
+                                  );
+                                },
+                                showRemove: true,
+                                onRemove: () {
+                                  listingsProvider.toggleFavorite(
+                                    user.uid,
+                                    item.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

@@ -1,14 +1,52 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
     // Listings collection
     match /listings/{listingId} {
-      // Allow authenticated users to read all listings
       allow read: if request.auth != null;
-      // Allow users to create their own listings
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      // Allow users to update/delete only their own listings
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+
+      allow update, delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Favorites collection
+    match /favorites/{favoriteId} {
+      allow read: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+
+      allow update: if false;
+    }
+
+    // Swap requests collection
+    match /swap_requests/{requestId} {
+      allow read: if request.auth != null
+        && (
+          request.auth.uid == resource.data.senderId ||
+          request.auth.uid == resource.data.receiverId
+        );
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.senderId;
+
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.receiverId;
+
+      allow delete: if request.auth != null
+        && (
+          request.auth.uid == resource.data.senderId ||
+          request.auth.uid == resource.data.receiverId
+        );
     }
   }
 }

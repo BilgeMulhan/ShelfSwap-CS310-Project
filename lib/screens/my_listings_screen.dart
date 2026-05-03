@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/listing_item.dart';
+
 import '../providers/listings_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_paddings.dart';
@@ -16,13 +16,17 @@ class MyListingsScreen extends StatefulWidget {
 }
 
 class _MyListingsScreenState extends State<MyListingsScreen> {
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
+
     // Load user's listings when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       final user = authProvider.user;
+
       if (user != null) {
         context.read<ListingsProvider>().loadUserListings(user.uid);
       }
@@ -42,43 +46,61 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
       ),
     );
 
     if (confirmed == true) {
-      final success = await context.read<ListingsProvider>().deleteListing(listingId);
+      final success =
+          await context.read<ListingsProvider>().deleteListing(listingId);
+
       if (!mounted) return;
 
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Listing deleted successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete listing')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'Listing deleted successfully'
+                : 'Failed to delete listing',
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Listings')),
+      appBar: AppBar(
+        title: const Text('My Listings'),
+      ),
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,
           child: Consumer<ListingsProvider>(
             builder: (context, listingsProvider, child) {
               if (listingsProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
 
               final userListings = listingsProvider.userListings;
+
+              final filteredListings = userListings.where((item) {
+                final query = _searchQuery.toLowerCase().trim();
+
+                if (query.isEmpty) return true;
+
+                return item.title.toLowerCase().contains(query) ||
+                    item.description.toLowerCase().contains(query) ||
+                    item.category.toLowerCase().contains(query) ||
+                    item.condition.toLowerCase().contains(query) ||
+                    item.location.toLowerCase().contains(query);
+              }).toList();
 
               if (userListings.isEmpty) {
                 return Center(
@@ -88,7 +110,8 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                       const Text('No listings yet'),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => Navigator.pushNamed(context, AppRoutes.addItem),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, AppRoutes.addItem),
                         child: const Text('Add Your First Listing'),
                       ),
                     ],
@@ -102,40 +125,53 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                     children: [
                       Expanded(
                         child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
                           decoration: InputDecoration(
                             hintText: 'Search...',
                             prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton(
-                        onPressed: () => Navigator.pushNamed(context, AppRoutes.addItem),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, AppRoutes.addItem),
                         child: const Text('+ Add New'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: userListings.length,
-                      itemBuilder: (context, index) {
-                        final item = userListings[index];
-                        return ListingCard(
-                          key: ValueKey(item.id),
-                          item: item,
-                          trailingLabel: 'Edit',
-                          onTrailingPressed: () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.addItem,
-                            arguments: item,
+                    child: filteredListings.isEmpty
+                        ? const Center(
+                            child: Text('No matching listings found'),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredListings.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredListings[index];
+
+                              return ListingCard(
+                                key: ValueKey(item.id),
+                                item: item,
+                                trailingLabel: 'Edit',
+                                onTrailingPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.addItem,
+                                  arguments: item,
+                                ),
+                                showRemove: true,
+                                onRemove: () => _deleteListing(item.id),
+                              );
+                            },
                           ),
-                          showRemove: true,
-                          onRemove: () => _deleteListing(item.id),
-                        );
-                      },
-                    ),
                   ),
                 ],
               );
