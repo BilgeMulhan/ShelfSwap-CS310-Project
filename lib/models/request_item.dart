@@ -4,6 +4,7 @@ class RequestItem {
   final String id;
   final String senderId;
   final String senderEmail;
+  final String createdBy;
   final String receiverId;
   final String itemId;
   final String itemTitle;
@@ -16,6 +17,7 @@ class RequestItem {
     required this.id,
     required this.senderId,
     required this.senderEmail,
+    required this.createdBy,
     required this.receiverId,
     required this.itemId,
     required this.itemTitle,
@@ -30,6 +32,9 @@ class RequestItem {
       id: id,
       senderId: data['senderId']?.toString() ?? '',
       senderEmail: data['senderEmail']?.toString() ?? '',
+      createdBy: data['createdBy']?.toString() ??
+          data['senderId']?.toString() ??
+          '',
       receiverId: data['receiverId']?.toString() ?? '',
       itemId: data['itemId']?.toString() ?? '',
       itemTitle: data['itemTitle']?.toString() ?? '',
@@ -44,6 +49,7 @@ class RequestItem {
     return {
       'senderId': senderId,
       'senderEmail': senderEmail,
+      'createdBy': createdBy,
       'receiverId': receiverId,
       'itemId': itemId,
       'itemTitle': itemTitle,

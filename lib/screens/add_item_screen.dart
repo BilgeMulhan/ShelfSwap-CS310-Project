@@ -192,6 +192,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           description: _descriptionController.text.trim(),
           category: _categoryController.text.trim(),
           userId: user.uid,
+          createdBy: user.uid,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );

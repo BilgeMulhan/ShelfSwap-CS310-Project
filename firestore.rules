@@ -48,5 +48,11 @@ service cloud.firestore {
           request.auth.uid == resource.data.receiverId
         );
     }
+
+    // User profiles collection
+    match /users/{userId} {
+      allow read, create, update, delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
   }
 }

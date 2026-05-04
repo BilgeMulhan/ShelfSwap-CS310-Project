@@ -75,6 +75,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             .collection('users')
             .doc(user.uid)
             .set({
+          'createdBy': user.uid,
+          'updatedAt': FieldValue.serverTimestamp(),
           'bio': _bioController.text.trim(),
         }, SetOptions(merge: true));
       }

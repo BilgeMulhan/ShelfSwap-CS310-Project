@@ -98,6 +98,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       id: '',
       senderId: currentUser.uid,
       senderEmail: currentUser.email ?? '',
+      createdBy: currentUser.uid,
       receiverId: item.userId,
       itemId: item.id,
       itemTitle: item.title,

@@ -42,35 +42,41 @@ class ShelfSwapApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ListingsProvider()),
         ChangeNotifierProvider(create: (_) => RequestsProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'ShelfSwap',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-          scaffoldBackgroundColor: AppColors.background,
-          textTheme: GoogleFonts.poppinsTextTheme(),
-          useMaterial3: true,
-        ),
-        initialRoute: AppRoutes.signIn,
-        routes: {
-          AppRoutes.home: (context) => const MainScreen(),
-          AppRoutes.createAccount: (context) => const CreateAccountScreen(),
-          AppRoutes.signIn: (context) => const SignInScreen(),
-          AppRoutes.profile: (context) => const ProfileScreen(),
-          AppRoutes.editProfile: (context) => const EditProfileScreen(),
-          AppRoutes.itemDetails: (context) {
-            final args = ModalRoute.of(context)!.settings.arguments;
-            return ItemDetailsScreen(item: args is ListingItem ? args : null);
-          },
-          AppRoutes.favorites: (context) => const FavoritesScreen(),
-          AppRoutes.myListings: (context) => const MyListingsScreen(),
-          AppRoutes.addItem: (context) {
-            final args = ModalRoute.of(context)!.settings.arguments;
-            return AddItemScreen.fromRouteArguments(args);
-          },
-          AppRoutes.preview: (context) => const PreviewScreen(),
-          AppRoutes.requests: (context) => const RequestsScreen(),
-          AppRoutes.requestChat: (context) => const RequestChatScreen(),
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'ShelfSwap',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+              scaffoldBackgroundColor: AppColors.background,
+              textTheme: GoogleFonts.poppinsTextTheme(),
+              useMaterial3: true,
+            ),
+            home: authProvider.isLoggedIn
+                ? const MainScreen()
+                : const SignInScreen(),
+            routes: {
+              AppRoutes.home: (context) => const MainScreen(),
+              AppRoutes.createAccount: (context) => const CreateAccountScreen(),
+              AppRoutes.signIn: (context) => const SignInScreen(),
+              AppRoutes.profile: (context) => const ProfileScreen(),
+              AppRoutes.editProfile: (context) => const EditProfileScreen(),
+              AppRoutes.itemDetails: (context) {
+                final args = ModalRoute.of(context)!.settings.arguments;
+                return ItemDetailsScreen(item: args is ListingItem ? args : null);
+              },
+              AppRoutes.favorites: (context) => const FavoritesScreen(),
+              AppRoutes.myListings: (context) => const MyListingsScreen(),
+              AppRoutes.addItem: (context) {
+                final args = ModalRoute.of(context)!.settings.arguments;
+                return AddItemScreen.fromRouteArguments(args);
+              },
+              AppRoutes.preview: (context) => const PreviewScreen(),
+              AppRoutes.requests: (context) => const RequestsScreen(),
+              AppRoutes.requestChat: (context) => const RequestChatScreen(),
+            },
+          );
         },
       ),
     );

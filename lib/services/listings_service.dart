@@ -96,6 +96,7 @@ class ListingsService {
   Future<void> addFavorite(String userId, String listingId) async {
     await _firestore.collection('favorites').doc('${userId}_$listingId').set({
       'userId': userId,
+      'createdBy': userId,
       'listingId': listingId,
       'createdAt': Timestamp.now(),
     });

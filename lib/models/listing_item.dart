@@ -9,6 +9,7 @@ class ListingItem {
   final String description;
   final String category;
   final String userId;
+  final String createdBy;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,6 +22,7 @@ class ListingItem {
     required this.description,
     required this.category,
     required this.userId,
+    required this.createdBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -36,6 +38,9 @@ class ListingItem {
       description: data['description']?.toString().trim() ?? '',
       category: data['category']?.toString().trim() ?? '',
       userId: data['userId']?.toString().trim() ?? '',
+      createdBy: data['createdBy']?.toString().trim() ??
+          data['userId']?.toString().trim() ??
+          '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -51,6 +56,7 @@ class ListingItem {
       'description': description,
       'category': category,
       'userId': userId,
+      'createdBy': createdBy,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -69,6 +75,7 @@ class ListingItem {
       description: updates['description'] ?? description,
       category: updates['category'] ?? category,
       userId: userId,
+      createdBy: createdBy,
       createdAt: createdAt,
       updatedAt: DateTime.now(), // Always update the updatedAt timestamp
     );
