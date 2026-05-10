@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/request_item.dart';
 import '../providers/auth_provider.dart';
-import '../providers/requests_provider.dart';
+import '../services/requests_service.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../widgets/request_card.dart';
@@ -17,6 +17,8 @@ class RequestsScreen extends StatefulWidget {
 
 class _RequestsScreenState extends State<RequestsScreen>
     with SingleTickerProviderStateMixin {
+  final RequestsService _requestsService = RequestsService();
+
   late TabController _tabController;
   String _searchQuery = '';
 
@@ -24,15 +26,10 @@ class _RequestsScreenState extends State<RequestsScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 2, vsync: this);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = context.read<AuthProvider>().user;
-
-      if (user != null) {
-        context.read<RequestsProvider>().loadRequests(user.uid);
-      }
-    });
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+    );
   }
 
   @override
@@ -55,51 +52,72 @@ class _RequestsScreenState extends State<RequestsScreen>
     }).toList();
   }
 
-  Widget _buildRequestsList({
-    required List<RequestItem> requests,
+  Widget _buildRequestsStream({
+    required Stream<List<RequestItem>> stream,
     required bool showActions,
   }) {
-    if (requests.isEmpty) {
-      return Center(
-        child: Text(
-          _searchQuery.trim().isEmpty
-              ? 'No requests yet'
-              : 'No matching requests found',
-        ),
-      );
-    }
+    return StreamBuilder<List<RequestItem>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-    return ListView.builder(
-      itemCount: requests.length,
-      itemBuilder: (context, index) {
-        final request = requests[index];
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Failed to load requests: ${snapshot.error}',
+            ),
+          );
+        }
 
-        return InkWell(
-          onTap: () => Navigator.pushNamed(
-            context,
-            AppRoutes.requestChat,
-            arguments: request,
-          ),
-          child: RequestCard(
-            request: request,
-            showActions: showActions,
-            onAccept: showActions
-                ? () {
-                    context.read<RequestsProvider>().updateRequestStatus(
+        final requests = _filterRequests(snapshot.data ?? []);
+
+        if (requests.isEmpty) {
+          return Center(
+            child: Text(
+              _searchQuery.trim().isEmpty
+                  ? 'No requests yet'
+                  : 'No matching requests found',
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: requests.length,
+          itemBuilder: (context, index) {
+            final request = requests[index];
+
+            return InkWell(
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.requestChat,
+                arguments: request,
+              ),
+              child: RequestCard(
+                request: request,
+                showActions: showActions,
+                onAccept: showActions
+                    ? () async {
+                        await _requestsService.updateRequestStatus(
                           request.id,
                           'accepted',
                         );
-                  }
-                : null,
-            onDecline: showActions
-                ? () {
-                    context.read<RequestsProvider>().updateRequestStatus(
+                      }
+                    : null,
+                onDecline: showActions
+                    ? () async {
+                        await _requestsService.updateRequestStatus(
                           request.id,
                           'declined',
                         );
-                  }
-                : null,
-          ),
+                      }
+                    : null,
+              ),
+            );
+          },
         );
       },
     );
@@ -108,13 +126,6 @@ class _RequestsScreenState extends State<RequestsScreen>
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
-    final requestsProvider = context.watch<RequestsProvider>();
-
-    final incomingRequests =
-        _filterRequests(requestsProvider.incomingRequests);
-
-    final outgoingRequests =
-        _filterRequests(requestsProvider.outgoingRequests);
 
     return Scaffold(
       appBar: AppBar(
@@ -150,25 +161,27 @@ class _RequestsScreenState extends State<RequestsScreen>
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 16),
+
                     Expanded(
-                      child: requestsProvider.isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildRequestsList(
-                                  requests: incomingRequests,
-                                  showActions: true,
-                                ),
-                                _buildRequestsList(
-                                  requests: outgoingRequests,
-                                  showActions: false,
-                                ),
-                              ],
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildRequestsStream(
+                            stream: _requestsService.getIncomingRequests(
+                              user.uid,
                             ),
+                            showActions: true,
+                          ),
+                          _buildRequestsStream(
+                            stream: _requestsService.getOutgoingRequests(
+                              user.uid,
+                            ),
+                            showActions: false,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

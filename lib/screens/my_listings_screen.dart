@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/listings_provider.dart';
+import '../models/listing_item.dart';
 import '../providers/auth_provider.dart';
+import '../services/listings_service.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/listing_card.dart';
 
 class MyListingsScreen extends StatefulWidget {
@@ -16,22 +16,9 @@ class MyListingsScreen extends StatefulWidget {
 }
 
 class _MyListingsScreenState extends State<MyListingsScreen> {
+  final ListingsService _listingsService = ListingsService();
+
   String _searchQuery = '';
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Load user's listings when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = context.read<AuthProvider>();
-      final user = authProvider.user;
-
-      if (user != null) {
-        context.read<ListingsProvider>().loadUserListings(user.uid);
-      }
-    });
-  }
 
   Future<void> _deleteListing(String listingId) async {
     final confirmed = await showDialog<bool>(
@@ -46,7 +33,9 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -54,25 +43,46 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
 
     if (confirmed == true) {
-      final success =
-          await context.read<ListingsProvider>().deleteListing(listingId);
+      try {
+        await _listingsService.deleteListing(listingId);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? 'Listing deleted successfully'
-                : 'Failed to delete listing',
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Listing deleted successfully'),
           ),
-        ),
-      );
+        );
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete listing: $e'),
+          ),
+        );
+      }
     }
+  }
+
+  List<ListingItem> _filterListings(List<ListingItem> listings) {
+    final query = _searchQuery.toLowerCase().trim();
+
+    if (query.isEmpty) return listings;
+
+    return listings.where((item) {
+      return item.title.toLowerCase().contains(query) ||
+          item.description.toLowerCase().contains(query) ||
+          item.category.toLowerCase().contains(query) ||
+          item.condition.toLowerCase().contains(query) ||
+          item.location.toLowerCase().contains(query);
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Listings'),
@@ -80,80 +90,92 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       body: SafeArea(
         child: Padding(
           padding: AppPaddings.screen,
-          child: Consumer<ListingsProvider>(
-            builder: (context, listingsProvider, child) {
-              if (listingsProvider.isLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              final userListings = listingsProvider.userListings;
-
-              final filteredListings = userListings.where((item) {
-                final query = _searchQuery.toLowerCase().trim();
-
-                if (query.isEmpty) return true;
-
-                return item.title.toLowerCase().contains(query) ||
-                    item.description.toLowerCase().contains(query) ||
-                    item.category.toLowerCase().contains(query) ||
-                    item.condition.toLowerCase().contains(query) ||
-                    item.location.toLowerCase().contains(query);
-              }).toList();
-
-              if (userListings.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('No listings yet'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, AppRoutes.addItem),
-                        child: const Text('Add Your First Listing'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+          child: user == null
+              ? const Center(
+                  child: Text('Please log in to see your listings.'),
+                )
+              : Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Search...',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, AppRoutes.addItem),
-                        child: const Text('+ Add New'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: filteredListings.isEmpty
-                        ? const Center(
-                            child: Text('No matching listings found'),
-                          )
-                        : ListView.builder(
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.addItem,
+                          ),
+                          child: const Text('+ Add New'),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Expanded(
+                      child: StreamBuilder<List<ListingItem>>(
+                        stream: _listingsService.getUserListings(user.uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Failed to load listings: ${snapshot.error}',
+                              ),
+                            );
+                          }
+
+                          final userListings = snapshot.data ?? [];
+                          final filteredListings =
+                              _filterListings(userListings);
+
+                          if (userListings.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('No listings yet'),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.addItem,
+                                    ),
+                                    child: const Text('Add Your First Listing'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          if (filteredListings.isEmpty) {
+                            return const Center(
+                              child: Text('No matching listings found'),
+                            );
+                          }
+
+                          return ListView.builder(
                             itemCount: filteredListings.length,
                             itemBuilder: (context, index) {
                               final item = filteredListings[index];
@@ -171,12 +193,12 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                                 onRemove: () => _deleteListing(item.id),
                               );
                             },
-                          ),
-                  ),
-                ],
-              );
-            },
-          ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

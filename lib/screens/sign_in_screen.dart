@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../providers/auth_provider.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
@@ -16,8 +18,18 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _rememberMe = false;
+  bool _isRememberPreferenceLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedEmail();
+  }
 
   @override
   void dispose() {
@@ -26,22 +38,72 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  Future<void> _loadRememberedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final rememberMe = prefs.getBool('remember_me') ?? false;
+    final rememberedEmail = prefs.getString('remembered_email') ?? '';
+
+    if (!mounted) return;
+
+    setState(() {
+      _rememberMe = rememberMe;
+      _isRememberPreferenceLoaded = true;
+
+      if (rememberMe && rememberedEmail.isNotEmpty) {
+        _emailController.text = rememberedEmail;
+      }
+    });
+  }
+
+  Future<void> _saveRememberMePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = _emailController.text.trim();
+
+    await prefs.setBool('remember_me', _rememberMe);
+
+    if (_rememberMe && email.isNotEmpty) {
+      await prefs.setString('remembered_email', email);
+    } else {
+      await prefs.remove('remembered_email');
+    }
+  }
+
   String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Email is required';
-    if (!value.contains('@')) return 'Enter a valid email';
+    if (value == null || value.trim().isEmpty) {
+      return 'Email is required';
+    }
+
+    if (!value.contains('@')) {
+      return 'Enter a valid email';
+    }
+
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
-    if (value.length < 6) return 'Password must be at least 6 characters';
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
     return null;
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Important:
+    // Save remember me preference BEFORE sign in.
+    // AuthGate may redirect immediately after Firebase login,
+    // so saving after login can sometimes be skipped.
+    await _saveRememberMePreference();
+
     final authProvider = context.read<AuthProvider>();
+
     final success = await authProvider.signIn(
       _emailController.text.trim(),
       _passwordController.text,
@@ -50,11 +112,17 @@ class _SignInScreenState extends State<SignInScreen> {
     if (!mounted) return;
 
     if (success) {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Giriş başarısız.'),
+          content: Text(
+            authProvider.errorMessage ?? 'Giriş başarısız.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -74,19 +142,37 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                const Icon(Icons.swap_horiz, size: 70),
+
+                const Icon(
+                  Icons.swap_horiz,
+                  size: 70,
+                ),
+
                 const SizedBox(height: 16),
-                const Text('ShelfSwap', style: AppTextStyles.title),
+
+                const Text(
+                  'ShelfSwap',
+                  style: AppTextStyles.title,
+                ),
+
                 const SizedBox(height: 8),
-                const Text('Welcome back! Sign in', style: AppTextStyles.subtitle),
+
+                const Text(
+                  'Welcome back! Sign in',
+                  style: AppTextStyles.subtitle,
+                ),
+
                 const SizedBox(height: 24),
+
                 CustomTextField(
                   controller: _emailController,
                   hintText: 'Enter your university email',
                   icon: Icons.email_outlined,
                   validator: _validateEmail,
                 ),
+
                 const SizedBox(height: 12),
+
                 CustomTextField(
                   controller: _passwordController,
                   hintText: 'Enter your password',
@@ -94,14 +180,44 @@ class _SignInScreenState extends State<SignInScreen> {
                   obscureText: true,
                   validator: _validatePassword,
                 ),
-                const SizedBox(height: 20),
+
+                const SizedBox(height: 8),
+
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _rememberMe,
+                      onChanged: _isRememberPreferenceLoaded
+                          ? (value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                            }
+                          : null,
+                    ),
+                    const Text('Remember me'),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
                 isLoading
                     ? const CircularProgressIndicator()
-                    : PrimaryButton(text: 'Continue', onPressed: _submit),
+                    : PrimaryButton(
+                        text: 'Continue',
+                        onPressed: _submit,
+                      ),
+
                 const SizedBox(height: 16),
+
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.createAccount),
-                  child: const Text('If you do not have an account please sign up'),
+                  onPressed: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.createAccount,
+                  ),
+                  child: const Text(
+                    'If you do not have an account please sign up',
+                  ),
                 ),
               ],
             ),

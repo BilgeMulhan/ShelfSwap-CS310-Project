@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/listings_provider.dart';
 import '../providers/requests_provider.dart';
+import '../providers/theme_provider.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../utils/app_text_styles.dart';
@@ -35,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authProvider = context.watch<AuthProvider>();
     final listingsProvider = context.watch<ListingsProvider>();
     final requestsProvider = context.watch<RequestsProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
 
     final firebaseUser = authProvider.user;
 
@@ -68,13 +70,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 radius: 42,
                 backgroundColor: Colors.grey,
               ),
+
               const SizedBox(height: 12),
+
               Text(
                 userName,
                 style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
               ),
+
               const SizedBox(height: 4),
+
               Text(userEmail),
+
               const SizedBox(height: 24),
 
               ListTile(
@@ -119,13 +126,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
+              SwitchListTile(
+                secondary: const Icon(Icons.dark_mode_outlined),
+                title: const Text('Dark Mode'),
+                value: themeProvider.isDarkMode,
+                onChanged: (value) {
+                  themeProvider.toggleTheme(value);
+                },
+              ),
+
               const SizedBox(height: 12),
 
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('Logout'),
-                onTap: () {
-                  authProvider.signOut();
+                onTap: () async {
+                  await authProvider.signOut();
+
+                  if (!context.mounted) return;
+
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.signIn,
