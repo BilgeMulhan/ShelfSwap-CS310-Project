@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
-import '../utils/app_routes.dart';
+
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;

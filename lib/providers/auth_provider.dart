@@ -34,12 +34,20 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  Future<bool> signUp(String email, String password) async {
+  Future<bool> signUp(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    final error = await _authService.signUp(email, password);
+    final error = await _authService.signUp(
+      email,
+      password,
+      displayName: displayName,
+    );
 
     _isLoading = false;
 

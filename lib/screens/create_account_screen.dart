@@ -35,6 +35,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final success = await authProvider.signUp(
       _emailController.text.trim(),
       _passwordController.text,
+      displayName: _usernameController.text.trim(),
     );
 
     if (!mounted) return;
@@ -78,7 +79,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   hintText: 'Enter your university email',
                   icon: Icons.email_outlined,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Email is required';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Email is required';
+                    }
                     if (!value.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -89,7 +92,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   hintText: 'Enter your username',
                   icon: Icons.person_outline,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Username is required';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Username is required';
+                    }
                     return null;
                   },
                 ),
@@ -100,8 +105,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   icon: Icons.lock_outline,
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Password is required';
-                    if (value.length < 6) return 'Password must be at least 6 characters';
+                    if (value == null || value.isEmpty) {
+                      return 'Password is required';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
                     return null;
                   },
                 ),
@@ -115,7 +124,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     context,
                     AppRoutes.signIn,
                   ),
-                  child: const Text('If you have an account press here to sign in'),
+                  child: const Text(
+                    'If you have an account press here to sign in',
+                  ),
                 ),
               ],
             ),

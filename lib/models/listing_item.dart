@@ -25,7 +25,6 @@ class ListingItem {
     required this.updatedAt,
   });
 
-  // Create from Firestore document
   factory ListingItem.fromFirestore(Map<String, dynamic> data, String id) {
     return ListingItem(
       id: id,
@@ -35,15 +34,15 @@ class ListingItem {
       imageUrl: data['imageUrl']?.toString().trim() ?? '',
       description: data['description']?.toString().trim() ?? '',
       category: data['category']?.toString().trim() ?? '',
-      userId: data['userId']?.toString().trim() ?? '',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      userId: (data['userId'] ?? data['createdBy'])?.toString().trim() ?? '',
+      createdAt: _timestampToDate(data['createdAt']),
+      updatedAt: _timestampToDate(data['updatedAt']),
     );
   }
 
-  // Convert to Firestore document
   Map<String, dynamic> toFirestore() {
     return {
+      'id': id,
       'title': title,
       'condition': condition,
       'location': location,
@@ -51,12 +50,12 @@ class ListingItem {
       'description': description,
       'category': category,
       'userId': userId,
+      'createdBy': userId,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
-  // Copy with updates
   ListingItem copyWith({Map<String, dynamic>? updates}) {
     if (updates == null) return this;
 
@@ -70,8 +69,13 @@ class ListingItem {
       category: updates['category'] ?? category,
       userId: userId,
       createdAt: createdAt,
-      updatedAt: DateTime.now(), // Always update the updatedAt timestamp
+      updatedAt: DateTime.now(),
     );
   }
-}
 
+  static DateTime _timestampToDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return DateTime.now();
+  }
+}

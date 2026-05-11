@@ -77,6 +77,17 @@ class RequestsProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteRequest(String requestId) async {
+    try {
+      await _requestsService.deleteRequest(requestId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _incomingSub?.cancel();

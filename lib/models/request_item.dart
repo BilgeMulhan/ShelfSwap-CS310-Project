@@ -28,7 +28,7 @@ class RequestItem {
   factory RequestItem.fromFirestore(Map<String, dynamic> data, String id) {
     return RequestItem(
       id: id,
-      senderId: data['senderId']?.toString() ?? '',
+      senderId: (data['senderId'] ?? data['createdBy'])?.toString() ?? '',
       senderEmail: data['senderEmail']?.toString() ?? '',
       receiverId: data['receiverId']?.toString() ?? '',
       itemId: data['itemId']?.toString() ?? '',
@@ -36,12 +36,14 @@ class RequestItem {
       location: data['location']?.toString() ?? '',
       message: data['message']?.toString() ?? '',
       status: data['status']?.toString() ?? 'pending',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: _timestampToDate(data['createdAt']),
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
+      'id': id,
+      'createdBy': senderId,
       'senderId': senderId,
       'senderEmail': senderEmail,
       'receiverId': receiverId,
@@ -65,5 +67,11 @@ class RequestItem {
     if (difference.inHours < 1) return '${difference.inMinutes}m ago';
     if (difference.inDays < 1) return '${difference.inHours}h ago';
     return '${difference.inDays}d ago';
+  }
+
+  static DateTime _timestampToDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return DateTime.now();
   }
 }

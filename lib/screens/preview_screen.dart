@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../utils/app_paddings.dart';
-import '../utils/app_routes.dart';
 import '../widgets/primary_button.dart';
 import '../utils/app_text_styles.dart';
 

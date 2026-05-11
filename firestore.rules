@@ -3,48 +3,85 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Listings collection
-    match /listings/{listingId} {
-      allow read: if request.auth != null;
-
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.userId;
-
-      allow update, delete: if request.auth != null
-        && request.auth.uid == resource.data.userId;
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // Favorites collection
+    function ownsIncomingUserData() {
+      return signedIn()
+        && (
+          request.resource.data.createdBy == request.auth.uid ||
+          request.resource.data.userId == request.auth.uid ||
+          request.resource.data.senderId == request.auth.uid
+        );
+    }
+
+    function ownsExistingUserData() {
+      return signedIn()
+        && (
+          resource.data.createdBy == request.auth.uid ||
+          resource.data.userId == request.auth.uid ||
+          resource.data.senderId == request.auth.uid
+        );
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.createdBy == request.auth.uid;
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /listings/{listingId} {
+      allow read: if signedIn();
+
+      allow create: if ownsIncomingUserData()
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.id == listingId;
+
+      allow update: if ownsExistingUserData()
+        && ownsIncomingUserData()
+        && resource.data.id == listingId;
+
+      allow delete: if ownsExistingUserData();
+    }
+
     match /favorites/{favoriteId} {
-      allow read: if request.auth != null
-        && request.auth.uid == resource.data.userId;
+      allow read: if ownsExistingUserData();
 
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.userId;
+      allow create: if ownsIncomingUserData()
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.id == favoriteId;
 
-      allow delete: if request.auth != null
-        && request.auth.uid == resource.data.userId;
-
+      allow delete: if ownsExistingUserData();
       allow update: if false;
     }
 
-    // Swap requests collection
     match /swap_requests/{requestId} {
-      allow read: if request.auth != null
+      allow read: if signedIn()
         && (
           request.auth.uid == resource.data.senderId ||
+          request.auth.uid == resource.data.createdBy ||
           request.auth.uid == resource.data.receiverId
         );
 
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.senderId;
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.senderId
+        && request.auth.uid == request.resource.data.createdBy
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.id == requestId;
 
-      allow update: if request.auth != null
-        && request.auth.uid == resource.data.receiverId;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.receiverId
+        && request.resource.data.senderId == resource.data.senderId
+        && request.resource.data.receiverId == resource.data.receiverId
+        && request.resource.data.createdBy == resource.data.createdBy;
 
-      allow delete: if request.auth != null
+      allow delete: if signedIn()
         && (
           request.auth.uid == resource.data.senderId ||
+          request.auth.uid == resource.data.createdBy ||
           request.auth.uid == resource.data.receiverId
         );
     }

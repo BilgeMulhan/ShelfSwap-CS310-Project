@@ -27,12 +27,25 @@ class RequestsService {
   }
 
   Future<void> createRequest(RequestItem request) async {
-    await _firestore.collection('swap_requests').add(request.toFirestore());
+    final docRef = _firestore.collection('swap_requests').doc();
+
+    await docRef.set({
+      ...request.toFirestore(),
+      'id': docRef.id,
+      'createdBy': request.senderId,
+      'senderId': request.senderId,
+      'createdAt': Timestamp.now(),
+    });
   }
 
   Future<void> updateRequestStatus(String requestId, String status) async {
     await _firestore.collection('swap_requests').doc(requestId).update({
       'status': status,
+      'updatedAt': Timestamp.now(),
     });
+  }
+
+  Future<void> deleteRequest(String requestId) async {
+    await _firestore.collection('swap_requests').doc(requestId).delete();
   }
 }

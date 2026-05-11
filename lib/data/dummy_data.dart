@@ -57,7 +57,8 @@ class DummyData {
       title: 'Keyboard',
       condition: 'Used',
       location: 'North Campus',
-      imageUrl: 'https://plugable.com/cdn/shop/products/main_ori_b946b2c9-ff40-415d-8b70-1efb64e5da61.jpg?pad_color=fff&v=1645482737&width=2200',
+      imageUrl:
+          'https://plugable.com/cdn/shop/products/main_ori_b946b2c9-ff40-415d-8b70-1efb64e5da61.jpg?pad_color=fff&v=1645482737&width=2200',
       description: 'Mechanical keyboard in good working condition',
       category: 'Electronics',
       userId: 'dummy_user_5',
@@ -69,28 +70,40 @@ class DummyData {
       title: 'Desk Chair',
       condition: 'Used',
       location: 'North Campus',
-      imageUrl: 'https://www.sikaic.com/cdn/shop/files/sikaic-office-chair-brown-mid-century-faux-leather-leather-office-chair-with-adjustable-back-brown-1155223843.jpg?v=1744255419',
+      imageUrl:
+          'https://www.sikaic.com/cdn/shop/files/sikaic-office-chair-brown-mid-century-faux-leather-leather-office-chair-with-adjustable-back-brown-1155223843.jpg?v=1744255419',
       description: 'Comfortable desk chair with adjustable height',
       category: 'Furniture',
       userId: 'dummy_user_6',
       createdAt: DateTime.now().subtract(const Duration(hours: 1)),
       updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
     ),
-
   ];
 
   static List<RequestItem> requests = [
     RequestItem(
-      sender: 'Ahmet Y.',
+      id: 'dummy_request_1',
+      senderId: 'dummy_sender_1',
+      senderEmail: 'ahmet.y@sabanciuniv.edu',
+      receiverId: 'dummy_receiver_1',
+      itemId: '3',
       itemTitle: 'Calculus Book',
       location: 'Campus Dorm',
-      time: '1h ago',
+      message: 'Hi, I would like to swap this item.',
+      status: 'pending',
+      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
     ),
     RequestItem(
-      sender: 'Mustafa',
+      id: 'dummy_request_2',
+      senderId: 'dummy_sender_2',
+      senderEmail: 'mustafa@sabanciuniv.edu',
+      receiverId: 'dummy_receiver_1',
+      itemId: '4',
       itemTitle: 'Vintage Lamp',
       location: 'Main Building',
-      time: '2d ago',
+      message: 'Is this item still available?',
+      status: 'pending',
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
   ];
 

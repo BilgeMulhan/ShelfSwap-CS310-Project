@@ -33,6 +33,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser != null) {
@@ -90,6 +92,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   }
 
   Future<void> _sendSwapRequest(User currentUser, ListingItem item) async {
+    final requestsProvider = context.read<RequestsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+
     setState(() {
       _isSendingRequest = true;
     });
@@ -107,7 +112,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       createdAt: DateTime.now(),
     );
 
-    final success = await context.read<RequestsProvider>().createRequest(request);
+    final success = await requestsProvider.createRequest(request);
 
     if (!mounted) return;
 
@@ -115,7 +120,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       _isSendingRequest = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
         content: Text(
           success ? 'Swap request sent' : 'Failed to send request',
@@ -170,9 +175,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Center(
                 child: Text(
                   displayTitle,
@@ -180,42 +183,40 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                   textAlign: TextAlign.center,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Text('Condition: $displayCondition'),
               const SizedBox(height: 8),
               Text('Location: $displayLocation'),
               const SizedBox(height: 12),
-
               const Text('Description:'),
               const SizedBox(height: 4),
               Text(displayDescription),
-
               const SizedBox(height: 20),
 
               if (currentUser != null && item != null)
                 Consumer<ListingsProvider>(
-                  builder: (context, listingsProvider, child) {
+                  builder: (consumerContext, listingsProvider, child) {
                     final isFavorite = listingsProvider.isFavorite(item.id);
 
                     return SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () async {
+                          final messenger =
+                              ScaffoldMessenger.of(consumerContext);
+                          final wasFavorite = isFavorite;
+
                           final success =
                               await listingsProvider.toggleFavorite(
                             currentUser.uid,
                             item.id,
                           );
 
-                          if (!mounted) return;
-
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             SnackBar(
                               content: Text(
                                 success
-                                    ? isFavorite
+                                    ? wasFavorite
                                         ? 'Removed from favorites'
                                         : 'Added to favorites'
                                     : 'Failed to update favorites',
@@ -240,7 +241,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
               if (currentUser == null)
                 const Center(
-                  child: Text('Please log in to add favorites or send requests.'),
+                  child: Text(
+                    'Please log in to add favorites or send requests.',
+                  ),
                 ),
 
               if (isOwnItem)

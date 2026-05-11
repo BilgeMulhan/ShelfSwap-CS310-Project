@@ -1,15 +1,13 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/listing_item.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../models/listing_item.dart';
 
 class ListingsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Get all listings (for home screen)
   Stream<List<ListingItem>> getListings() {
     return _firestore
         .collection('listings')
@@ -22,15 +20,14 @@ class ListingsService {
     });
   }
 
-  // Convert an image to a base64 data URI and store it in Firestore via the listing document.
   Future<String> uploadListingImage(XFile imageFile, String userId) async {
     final bytes = await imageFile.readAsBytes();
-    final mimeType = 'image/jpeg';
+    const mimeType = 'image/jpeg';
     final base64Data = base64Encode(bytes);
+
     return 'data:$mimeType;base64,$base64Data';
   }
 
-  // Get user's own listings
   Stream<List<ListingItem>> getUserListings(String userId) {
     return _firestore
         .collection('listings')
@@ -44,30 +41,42 @@ class ListingsService {
     });
   }
 
-  // Add new listing
   Future<String> addListing(ListingItem listing) async {
-    final docRef =
-        await _firestore.collection('listings').add(listing.toFirestore());
+    final docRef = _firestore.collection('listings').doc();
+    final now = Timestamp.now();
+
+    await docRef.set({
+      ...listing.toFirestore(),
+      'id': docRef.id,
+      'createdBy': listing.userId,
+      'userId': listing.userId,
+      'createdAt': now,
+      'updatedAt': now,
+    });
+
     return docRef.id;
   }
 
-  // Update listing
   Future<void> updateListing(
     String listingId,
     Map<String, dynamic> updates,
   ) async {
+    final safeUpdates = Map<String, dynamic>.from(updates)
+      ..remove('id')
+      ..remove('userId')
+      ..remove('createdBy')
+      ..remove('createdAt');
+
     await _firestore.collection('listings').doc(listingId).update({
-      ...updates,
+      ...safeUpdates,
       'updatedAt': Timestamp.now(),
     });
   }
 
-  // Delete listing
   Future<void> deleteListing(String listingId) async {
     await _firestore.collection('listings').doc(listingId).delete();
   }
 
-  // Get single listing by ID
   Future<ListingItem?> getListing(String listingId) async {
     final doc = await _firestore.collection('listings').doc(listingId).get();
 
@@ -78,7 +87,6 @@ class ListingsService {
     return null;
   }
 
-  // Get favorite listing IDs for current user
   Stream<List<String>> getFavoriteIds(String userId) {
     return _firestore
         .collection('favorites')
@@ -92,17 +100,22 @@ class ListingsService {
     });
   }
 
-  // Add listing to favorites
   Future<void> addFavorite(String userId, String listingId) async {
-    await _firestore.collection('favorites').doc('${userId}_$listingId').set({
+    final favoriteId = '${userId}_$listingId';
+
+    await _firestore.collection('favorites').doc(favoriteId).set({
+      'id': favoriteId,
+      'createdBy': userId,
       'userId': userId,
       'listingId': listingId,
       'createdAt': Timestamp.now(),
     });
   }
 
-  // Remove listing from favorites
   Future<void> removeFavorite(String userId, String listingId) async {
-    await _firestore.collection('favorites').doc('${userId}_$listingId').delete();
+    await _firestore
+        .collection('favorites')
+        .doc('${userId}_$listingId')
+        .delete();
   }
 }

@@ -96,13 +96,11 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Important:
-    // Save remember me preference BEFORE sign in.
-    // AuthGate may redirect immediately after Firebase login,
-    // so saving after login can sometimes be skipped.
+    final authProvider = context.read<AuthProvider>();
+
     await _saveRememberMePreference();
 
-    final authProvider = context.read<AuthProvider>();
+    if (!mounted) return;
 
     final success = await authProvider.signIn(
       _emailController.text.trim(),
@@ -142,37 +140,28 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-
                 const Icon(
                   Icons.swap_horiz,
                   size: 70,
                 ),
-
                 const SizedBox(height: 16),
-
                 const Text(
                   'ShelfSwap',
                   style: AppTextStyles.title,
                 ),
-
                 const SizedBox(height: 8),
-
                 const Text(
                   'Welcome back! Sign in',
                   style: AppTextStyles.subtitle,
                 ),
-
                 const SizedBox(height: 24),
-
                 CustomTextField(
                   controller: _emailController,
                   hintText: 'Enter your university email',
                   icon: Icons.email_outlined,
                   validator: _validateEmail,
                 ),
-
                 const SizedBox(height: 12),
-
                 CustomTextField(
                   controller: _passwordController,
                   hintText: 'Enter your password',
@@ -180,9 +169,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   obscureText: true,
                   validator: _validatePassword,
                 ),
-
                 const SizedBox(height: 8),
-
                 Row(
                   children: [
                     Checkbox(
@@ -198,23 +185,21 @@ class _SignInScreenState extends State<SignInScreen> {
                     const Text('Remember me'),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
                 isLoading
                     ? const CircularProgressIndicator()
                     : PrimaryButton(
                         text: 'Continue',
                         onPressed: _submit,
                       ),
-
                 const SizedBox(height: 16),
-
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.createAccount,
-                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.createAccount,
+                    );
+                  },
                   child: const Text(
                     'If you do not have an account please sign up',
                   ),

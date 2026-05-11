@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../services/user_profile_service.dart';
 import '../utils/app_paddings.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -14,29 +14,28 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  final UserProfileService _profileService = UserProfileService();
+
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _bioController;
+
   Future<void> _loadBio() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _profileService.currentUser;
 
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+    if (user == null) return;
 
-      if (doc.exists) {
-        final data = doc.data();
-        _bioController.text = data?['bio'] ?? '';
-      }
-    }
+    final bio = await _profileService.getBio(user.uid);
+
+    if (!mounted) return;
+
+    _bioController.text = bio;
   }
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _profileService.currentUser;
 
     _nameController = TextEditingController(
       text: user?.displayName ?? user?.email?.split('@').first ?? '',
@@ -46,9 +45,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       text: user?.email ?? '',
     );
 
-    _bioController = TextEditingController(
-      text: '',
-    );
+    _bioController = TextEditingController(text: '');
 
     _loadBio();
   }
@@ -61,27 +58,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _save() async {
-    if (_formKey.currentState!.validate()) {
-      final user = FirebaseAuth.instance.currentUser;
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      if (user != null) {
-        // update name
-        await user.updateDisplayName(_nameController.text.trim());
-        await user.reload();
+    final user = _profileService.currentUser;
 
-        // save bio to Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
-          'bio': _bioController.text.trim(),
-        }, SetOptions(merge: true));
-      }
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to edit profile.')),
+      );
+      return;
+    }
+
+    try {
+      await _profileService.updateProfile(
+        userId: user.uid,
+        displayName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        bio: _bioController.text.trim(),
+      );
 
       if (!mounted) return;
-
       Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save profile: $e')),
+      );
     }
   }
 
@@ -102,7 +105,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   controller: _nameController,
                   hintText: 'Name',
                   icon: Icons.person_outline,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Name is required' : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Name is required'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 CustomTextField(
@@ -117,7 +122,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   hintText: 'Bio',
                   icon: Icons.info_outline,
                   maxLines: 3,
-                  validator: (value) => value == null || value.trim().isEmpty ? 'Bio is required' : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Bio is required'
+                      : null,
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -129,7 +136,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(child: PrimaryButton(text: 'Save', onPressed: _save)),
+                    Expanded(
+                      child: PrimaryButton(text: 'Save', onPressed: _save),
+                    ),
                   ],
                 ),
               ],

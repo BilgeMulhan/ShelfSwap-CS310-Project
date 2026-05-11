@@ -46,14 +46,11 @@ class RequestCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 6),
-
             Text(
               'From: ${request.senderName}',
               style: const TextStyle(fontSize: 14),
             ),
-
             if (request.senderEmail.isNotEmpty) ...[
               const SizedBox(height: 2),
               Text(
@@ -64,9 +61,7 @@ class RequestCard extends StatelessWidget {
                 ),
               ),
             ],
-
             const SizedBox(height: 6),
-
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, size: 16),
@@ -80,7 +75,6 @@ class RequestCard extends StatelessWidget {
                 ),
               ],
             ),
-
             if (request.message.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
@@ -90,9 +84,7 @@ class RequestCard extends StatelessWidget {
                 ),
               ),
             ],
-
             const SizedBox(height: 10),
-
             Row(
               children: [
                 Container(
@@ -101,7 +93,7 @@ class RequestCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -122,7 +114,6 @@ class RequestCard extends StatelessWidget {
                 ),
               ],
             ),
-
             if (showActions && request.status == 'pending') ...[
               const SizedBox(height: 12),
               Row(
